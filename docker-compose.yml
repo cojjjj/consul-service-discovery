@@ -1,0 +1,48 @@
+services:
+  consul:
+    image: hashicorp/consul:latest
+    command: agent -dev -client=0.0.0.0
+    ports:
+      - "8500:8500"
+
+  service-a:
+    build: ./service-a
+    environment:
+      SERVICE_NAME: service-a
+      DISPLAY_NAME: Service A
+      SERVICE_PORT: 3001
+      CONSUL_HOST: consul
+    depends_on:
+      - consul
+
+  service-b:
+    build: ./service-b
+    environment:
+      SERVICE_NAME: service-b
+      DISPLAY_NAME: Service B
+      SERVICE_PORT: 3002
+      CONSUL_HOST: consul
+    depends_on:
+      - consul
+
+  service-c:
+    build: ./service-c
+    environment:
+      SERVICE_NAME: service-c
+      DISPLAY_NAME: Service C
+      SERVICE_PORT: 3003
+      CONSUL_HOST: consul
+    depends_on:
+      - consul
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    environment:
+      CONSUL_HOST: consul
+    depends_on:
+      - consul
+      - service-a
+      - service-b
+      - service-c
